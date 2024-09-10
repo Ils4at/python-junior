@@ -1,4 +1,8 @@
-def decorator_maker():
+from block_1.common import MyException, specific_func
+import time
+
+
+def decorator_maker(times, delay):
     """
     Обертка, которая повторяет вызов функции times раз с паузой delay секунд
     Args:
@@ -8,5 +12,21 @@ def decorator_maker():
     Returns:
         валидное значение (при вызове bool() -> True)
     """
-    raise NotImplementedError
+    def decorator(function):
 
+        def wrapper():
+            nonlocal times
+            for i in range(1, times + 1):
+                try:
+                    result = function()
+                    return result
+                except AssertionError:
+                    if i == times:
+                        raise MyException(Exception)
+                i += 1
+                time.sleep(delay)
+
+        return wrapper
+    return decorator
+
+    # raise NotImplementedError

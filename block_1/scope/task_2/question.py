@@ -12,3 +12,8 @@ def transmit_to_space(message):
 
 
 print(transmit_to_space("Test message"))
+"""
+Ответ
+"Test message" один раз только выводится так как в первой функции не указан print, transmit_to_space выведет None 
+пустоту.   
+"""
