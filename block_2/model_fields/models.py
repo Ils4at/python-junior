@@ -10,22 +10,32 @@ class WorkerManager(models.Manager):
         """
         Переопределенный кверисет с фильтрацией сотрудников с заданной датой принятия на работу и с не пустым табельным номером отличным от 0
         """
-
-        raise NotImplementedError
-
+        try:
+            active_workers = super().get_queryser().filter(startwork_date__isnull=False, tab_num__qt=0)
+        except NotImplementedError:
+            raise NotImplementedError
+        return active_workers
 
     def get_workers_info(self):
         """
-            Получение  списка строк в которых содержится
+            Получение списка строк в которых содержится
         фамилия, имя, табельный номер сотрудника а также название подразделения в котором числится
         Строки упорядочены по фамилии и имени сотрудника.
         Каждая строка должна быть в формате вида: Васильев Василий, 888, Подразделение №1
         """
-
-        raise NotImplementedError
+        result = Worker.objects.all().values("first_name", "last_name", "tab_num", "department").selected_related("department")
+        res_list = list()
+        for item in result:
+            res_list.append(f'{item.get('first_name')} + {item.get('last_name')} + {str(item.get('tab_num'))} + '
+                            f'{item.get('department__name')}')
+        return res_list
+        # raise NotImplementedError
 
 
 class Department(models.Model):
+    objects = WorkerManager()
+    objects_all = Manager()
+
     name = models.CharField('Наименование', max_length=30)
 
     @property
@@ -33,14 +43,17 @@ class Department(models.Model):
         """
         Количество активных сотрудников подразделения
         """
-        raise NotImplementedError
+        return Worker.objects.filter(department=self.pk).count()
+        # raise NotImplementedError
 
     @property
     def get_all_worker_count(self):
         """
         Количество всех сотрудников подразделения
         """
-        raise NotImplementedError
+
+        return Worker.objects_all.filter(department=self.pk).count()
+        # raise NotImplementedError
 
     class Meta:
         db_table = 'department'
@@ -63,3 +76,4 @@ class Worker(models.Model):
     class Meta:
         db_table = 'workers'
         verbose_name = 'Сотрудник'
+
