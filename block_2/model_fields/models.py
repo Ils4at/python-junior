@@ -1,4 +1,6 @@
 from django.db import models
+
+from django.db import models
 from django.db.models import Manager
 
 
@@ -10,11 +12,7 @@ class WorkerManager(models.Manager):
         """
         Переопределенный кверисет с фильтрацией сотрудников с заданной датой принятия на работу и с не пустым табельным номером отличным от 0
         """
-        try:
-            active_workers = super().get_queryser().filter(startwork_date__isnull=False, tab_num__qt=0)
-        except NotImplementedError:
-            raise NotImplementedError
-        return active_workers
+        return super().get_queryset().filter(startwork_date__isnull=False, tab_num__gt=0)
 
     def get_workers_info(self):
         """
@@ -23,18 +21,17 @@ class WorkerManager(models.Manager):
         Строки упорядочены по фамилии и имени сотрудника.
         Каждая строка должна быть в формате вида: Васильев Василий, 888, Подразделение №1
         """
-        result = Worker.objects.all().values("first_name", "last_name", "tab_num", "department").selected_related("department")
+        result = Worker.objects.all().filter("first_name", "last_name", "tab_num", "department").selected_related("department")
         res_list = list()
         for item in result:
-            res_list.append(f'{item.get('first_name')} + {item.get('last_name')} + {str(item.get('tab_num'))} + '
+            res_list.append(f'{item.get('first_name')} {item.get('last_name')}, {str(item.get('tab_num'))},'
                             f'{item.get('department__name')}')
         return res_list
         # raise NotImplementedError
 
 
 class Department(models.Model):
-    objects = WorkerManager()
-    objects_all = Manager()
+    objects = Manager()
 
     name = models.CharField('Наименование', max_length=30)
 
@@ -76,4 +73,3 @@ class Worker(models.Model):
     class Meta:
         db_table = 'workers'
         verbose_name = 'Сотрудник'
-
