@@ -1,6 +1,4 @@
 from django.db import models
-
-from django.db import models
 from django.db.models import Manager
 
 
@@ -12,7 +10,7 @@ class WorkerManager(models.Manager):
         """
         Переопределенный кверисет с фильтрацией сотрудников с заданной датой принятия на работу и с не пустым табельным номером отличным от 0
         """
-        return super().get_queryset().filter(startwork_date__isnull=False, tab_num__gt=0)
+        return super().get_queryser().filter(startwork_date__isnull=False, tab_num__qt=0)
 
     def get_workers_info(self):
         """
@@ -21,18 +19,18 @@ class WorkerManager(models.Manager):
         Строки упорядочены по фамилии и имени сотрудника.
         Каждая строка должна быть в формате вида: Васильев Василий, 888, Подразделение №1
         """
-        result = Worker.objects.all().filter("first_name", "last_name", "tab_num", "department").selected_related("department")
-        res_list = list()
+        result = Worker.objects.get_queryset().select_related("department")
+        list_staff = []
         for item in result:
-            res_list.append(f'{item.get('first_name')} {item.get('last_name')}, {str(item.get('tab_num'))},'
-                            f'{item.get('department__name')}')
-        return res_list
+            list_staff.append(' '.join([item.first_name, item.last_name]))
+            list_staff.append(item.tab_num)
+            list_staff.append(item.department)
+        return list_staff
         # raise NotImplementedError
 
 
 class Department(models.Model):
     objects = Manager()
-
     name = models.CharField('Наименование', max_length=30)
 
     @property
@@ -40,7 +38,7 @@ class Department(models.Model):
         """
         Количество активных сотрудников подразделения
         """
-        return Worker.objects.filter(department=self.pk).count()
+        return Worker.objects.all().select_related("department").filter(department=self.pk).count()
         # raise NotImplementedError
 
     @property
@@ -49,7 +47,7 @@ class Department(models.Model):
         Количество всех сотрудников подразделения
         """
 
-        return Worker.objects_all.filter(department=self.pk).count()
+        return Worker.objects_all.all().select_related("department").filter(department=self.pk).count()
         # raise NotImplementedError
 
     class Meta:
@@ -73,3 +71,4 @@ class Worker(models.Model):
     class Meta:
         db_table = 'workers'
         verbose_name = 'Сотрудник'
+
