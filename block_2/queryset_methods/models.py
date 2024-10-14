@@ -1,6 +1,7 @@
 from django.db import (
     models,
 )
+from django.db.models import Manager
 
 
 class Product(models.Model):
@@ -53,6 +54,8 @@ class Order(models.Model):
     """
     Заказ
     """
+    objects = Manager()
+
     number = models.CharField('Номер', max_length=50)
     date_formation = models.DateField('Дата')
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE, verbose_name='Покупатель')
@@ -65,6 +68,8 @@ class OrderItem(models.Model):
     """
     Позиция заказа
     """
+    objects = Manager()
+
     order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name='Заказ')
     product = models.ForeignKey('Product', on_delete=models.PROTECT, verbose_name='Товар')
     count = models.DecimalField(verbose_name='Количество', max_digits=6, decimal_places=2)
