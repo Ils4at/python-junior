@@ -12,7 +12,6 @@ def get_top_customer_in_period(begin, end):
     Returns: возвращает имя покупателя и количество его заказов за указанный период
     """
     s = Order.objects.filter(date_formation__gte=begin, date_formation__lte=end).values('customer__name').order_by('-date_formation').order_by('customer__name').annotate(dcount=Count('customer__name'))[:1]
-    print(len(s), 'dsddsds')
     if len(s) > 0:
         return s[0]['customer__name'], s[0]['dcount']
     else:
