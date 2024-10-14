@@ -1,5 +1,5 @@
-from block_2.queryset_methods.models import Customer, Order
-from django.db.models import Count, Max, Min
+from block_2.queryset_methods.models import Order
+from django.db.models import Count
 
 
 def get_top_customer_in_period(begin, end):
@@ -11,10 +11,9 @@ def get_top_customer_in_period(begin, end):
 
     Returns: возвращает имя покупателя и количество его заказов за указанный период
     """
-    res = Order.objects.all().filter(date_formation__lte=begin, date_formation__gte=end).annotate(Max(Count('customer')))
-    res = res.filter(Min('date_formation')).order_by('customer__name')[0]
-
-    if res[0].customer__count >= 0:
-        return res[0].customer__name, res[0].customer__count
+    s = Order.objects.filter(date_formation__gte=begin, date_formation__lte=end).values('customer__name').order_by('-date_formation').order_by('customer__name').annotate(dcount=Count('customer__name'))[:1]
+    print(len(s), 'dsddsds')
+    if len(s) > 0:
+        return s[0]['customer__name'], s[0]['dcount']
     else:
-        raise None
+        return None
