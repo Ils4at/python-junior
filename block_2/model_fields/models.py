@@ -10,7 +10,7 @@ class WorkerManager(models.Manager):
         """
         Переопределенный кверисет с фильтрацией сотрудников с заданной датой принятия на работу и с не пустым табельным номером отличным от 0
         """
-        return super().get_queryser().filter(startwork_date__isnull=False, tab_num__qt=0)
+        return super().get_queryset().filter(startwork_date__isnull=False, tab_num__qt=0)
 
     def get_workers_info(self):
         """

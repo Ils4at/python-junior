@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Manager
 
 
 class WorkerManager(models.Manager):
@@ -9,28 +10,38 @@ class WorkerManager(models.Manager):
         """
         Переопределенный кверисет возвращающий всех сотрудников без директоров
         """
+        return super().get_queryset().exclude(pk__in=Director.objects_all.values_list('pk', flat=True))
 
-        raise NotImplementedError
 
-
-class EducationOffice(models.Model):
+class Office(models.Model):
     """
-    Учебный офис
+    Общие поля для офисов
     """
     address = models.TextField('Адрес')
     mail = models.CharField('Адрес почты', max_length=30,)
+
+    class Meta:
+        abstract = True
+
+
+class EducationOffice(Office):
+    """
+    Учебный офис
+    """
+    objects = Manager()
+
     is_active = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'education_office'
 
 
-class GeneralOffice(models.Model):
+class GeneralOffice(Office):
     """
     Головной офис
     """
-    address = models.TextField('Адрес')
-    mail = models.CharField('Адрес почты', max_length=30)
+    objects = Manager()
+
     name = models.TextField('Название головного офиса ')
 
     class Meta:
@@ -81,14 +92,18 @@ class Worker(Person):
 
 class OrderedWorker(Worker):
     """
-    Модель с  сотрудниками упорядоченными по фамилии и дате приема на работу
+    Модель с сотрудниками упорядоченными по фамилии и дате приема на работу
     """
     @property
     def startwork_year(self):
         """
         Получить значение года приема на работу
         """
-        raise NotImplementedError
+        return OrderedWorker.objects_all.first().startwork_date.year
+
+    class Meta:
+        ordering = ['first_name', 'startwork_date']
+        proxy = True
 
 
 class Director(Worker):
